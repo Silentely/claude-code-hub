@@ -36,7 +36,7 @@ export const EnvSchema = z.object({
   DEBUG_MODE: z.string().default("false").transform(booleanTransform),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
   TZ: z.string().default("Asia/Shanghai"),
-  ENABLE_MULTI_PROVIDER_TYPES: z.string().default("false").transform(booleanTransform),
+  ENABLE_MULTI_PROVIDER_TYPES: z.string().default("true").transform(booleanTransform),
   ENABLE_CIRCUIT_BREAKER_ON_NETWORK_ERRORS: z.string().default("false").transform(booleanTransform),
   // Fetch 超时配置（毫秒）
   FETCH_BODY_TIMEOUT: z.coerce.number().default(120000), // 请求/响应体传输超时（默认 120 秒）
