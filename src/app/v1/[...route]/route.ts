@@ -26,6 +26,10 @@ app.post("/chat/completions", handleChatCompletions);
 // Response API 路由（支持 Codex）
 app.post("/responses", handleChatCompletions); // OpenAI
 
+// Claude Messages API 路由（显式声明）
+app.all("/messages", handleProxyRequest);
+app.all("/messages/*", handleProxyRequest);
+
 // Claude API 和其他所有请求（fallback）
 app.all("*", handleProxyRequest);
 
