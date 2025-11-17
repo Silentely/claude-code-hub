@@ -522,7 +522,7 @@
           "joinCodexPool": {
             "label": "加入 Codex 调度池",
             "desc": "启用后，此供应商将参与 /v1/responses 请求的转换和调度",
-            "help": "仅对 openai-compatible 类型供应商有效。启用后，当客户端访问 /v1/responses 端点时，此供应商会参与调度并进行格式转换。"
+            "help": "仅对 openai-compatible 类型供应商有效，且需在模型重定向中声明 *-codex → 目标模型。启用后，当客户端访问 /v1/responses 端点时，此供应商会参与调度并进行格式转换。示例：gpt-5.1-codex → gpt-4.1-responses。"
           },
           "modelWhitelist": {
             "title": "模型白名单",
