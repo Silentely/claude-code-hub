@@ -113,6 +113,12 @@ export const providers = pgTable('providers', {
     .default('auto')
     .$type<'auto' | 'force_official' | 'keep_original'>(),
 
+  // Codex 客户端伪装：是否将 User-Agent/originator 强制伪装为官方 Codex CLI
+  codexClientSpoofing: boolean('codex_client_spoofing').default(false),
+
+  // Claude 客户端伪装：是否将 User-Agent 强制伪装为官方 Claude CLI
+  claudeClientSpoofing: boolean('claude_client_spoofing').default(false),
+
   // 金额限流配置
   limit5hUsd: numeric('limit_5h_usd', { precision: 10, scale: 2 }),
   limitWeeklyUsd: numeric('limit_weekly_usd', { precision: 10, scale: 2 }),

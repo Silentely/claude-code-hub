@@ -39,6 +39,12 @@ export interface Provider {
   // 仅对 providerType = 'codex' 的供应商有效
   codexInstructionsStrategy: CodexInstructionsStrategy;
 
+  // Codex 客户端伪装
+  codexClientSpoofing: boolean;
+
+  // Claude 客户端伪装
+  claudeClientSpoofing: boolean;
+
   // 金额限流配置
   limit5hUsd: number | null;
   limitWeeklyUsd: number | null;
@@ -96,6 +102,9 @@ export interface ProviderDisplay {
   joinCodexPool: boolean;
   // Codex Instructions 策略
   codexInstructionsStrategy: CodexInstructionsStrategy;
+  // 客户端伪装
+  codexClientSpoofing: boolean;
+  claudeClientSpoofing: boolean;
   // 金额限流配置
   limit5hUsd: number | null;
   limitWeeklyUsd: number | null;
@@ -146,6 +155,8 @@ export interface CreateProviderData {
   join_claude_pool?: boolean;
   join_codex_pool?: boolean;
   codex_instructions_strategy?: CodexInstructionsStrategy;
+  codex_client_spoofing?: boolean;
+  claude_client_spoofing?: boolean;
 
   // 金额限流配置
   limit_5h_usd?: number | null;
@@ -198,6 +209,8 @@ export interface UpdateProviderData {
   join_claude_pool?: boolean;
   join_codex_pool?: boolean;
   codex_instructions_strategy?: CodexInstructionsStrategy;
+  codex_client_spoofing?: boolean;
+  claude_client_spoofing?: boolean;
 
   // 金额限流配置
   limit_5h_usd?: number | null;

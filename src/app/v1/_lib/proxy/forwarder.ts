@@ -15,7 +15,12 @@ import type { ProxySession } from "./session";
 import { defaultRegistry } from "../converters";
 import type { Format } from "../converters/types";
 import { mapClientFormatToTransformer, mapProviderTypeToTransformer } from "./format-mapper";
-import { isOfficialCodexClient, sanitizeCodexRequest } from "../codex/utils/request-sanitizer";
+import {
+  DEFAULT_CODEX_CLIENT_ORIGINATOR,
+  DEFAULT_CODEX_CLIENT_USER_AGENT,
+  isOfficialCodexClient,
+  sanitizeCodexRequest,
+} from "../codex/utils/request-sanitizer";
 import { getDefaultInstructions } from "../codex/constants/codex-instructions";
 import { CodexInstructionsCache } from "@/lib/codex-instructions-cache";
 import { createProxyAgentForProvider } from "@/lib/proxy-agent";
@@ -1002,14 +1007,52 @@ export class ProxyForwarder {
       delete overrides["x-api-key"];
     }
 
-    // Codex 特殊处理：若存在原始 User-Agent 则透传，否则兜底设置
+    // Codex 特殊处理：可根据供应商级别配置伪装官方 Codex 客户端
     if (provider.providerType === "codex") {
-      const originalUA = session.userAgent;
-      overrides["user-agent"] =
-        originalUA || "codex_cli_rs/0.55.0 (Mac OS 26.1.0; arm64) vscode/2.0.64";
-      logger.debug("ProxyForwarder: Codex provider detected, setting User-Agent", {
-        originalUA: session.userAgent ? "provided" : "fallback",
-      });
+      const originalUA = session.userAgent || "";
+      const inboundOriginator = session.headers.get("originator");
+      const officialClient = isOfficialCodexClient(originalUA);
+      const spoofingEnabled = provider.codexClientSpoofing ?? false;
+      const shouldSpoof = spoofingEnabled && !officialClient;
+
+      overrides["user-agent"] = shouldSpoof
+        ? DEFAULT_CODEX_CLIENT_USER_AGENT
+        : originalUA || DEFAULT_CODEX_CLIENT_USER_AGENT;
+
+      if (shouldSpoof) {
+        overrides["originator"] = DEFAULT_CODEX_CLIENT_ORIGINATOR;
+      } else if (inboundOriginator) {
+        overrides["originator"] = inboundOriginator;
+      } else if (officialClient) {
+        overrides["originator"] = DEFAULT_CODEX_CLIENT_ORIGINATOR;
+      }
+
+      logger.debug(
+        "ProxyForwarder: Codex provider detected, applying client spoofing policy",
+        {
+          originalUA: session.userAgent ? "provided" : "fallback",
+          spoofingEnabled,
+          spoofed: shouldSpoof,
+          officialClient,
+          inboundOriginator: inboundOriginator ? "provided" : "missing",
+        }
+      );
+    }
+
+    // Claude 供应商伪装：根据供应商级别配置，必要时伪装成官方 Claude CLI
+    if (provider.providerType === "claude" || provider.providerType === "claude-auth") {
+      const spoofingEnabled = provider.claudeClientSpoofing ?? false;
+      if (spoofingEnabled) {
+        const originalUA = session.userAgent || "";
+        overrides["user-agent"] = originalUA || "claude-cli/2.0.0 (external, cli)";
+        logger.debug(
+          "ProxyForwarder: Claude provider detected, applying client spoofing policy",
+          {
+            originalUA: session.userAgent ? "provided" : "fallback",
+            spoofingEnabled,
+          }
+        );
+      }
     }
 
     const headerProcessor = HeaderProcessor.createForProxy({

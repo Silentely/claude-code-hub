@@ -657,7 +657,18 @@
             },
             "placeholder": "选择策略"
           },
-          "hint": "提示: 部分严格的 Codex 中转站（如 88code、foxcode）需要官方 instructions，选择\"自动\"或\"强制官方\"策略"
+          "hint": "提示: 部分严格的 Codex 中转站（如 88code、foxcode）需要官方 instructions，选择\"自动\"或\"强制官方\"策略",
+          "spoof": {
+            "label": "强制官方 Codex 客户端标头",
+            "desc": "当上游拒绝部分客户端时，覆写 User-Agent 与 originator 以模拟官方 Codex CLI。",
+            "hint": "仅在供应商对非官方客户端返回 403 时启用，官方 Codex CLI 请求不会被修改。"
+          }
+        },
+        "claudeSpoof": {
+          "title": "Claude 客户端伪装",
+          "desc": "当 Anthropic 端要求官方身份时，模拟官方 Claude CLI 的 User-Agent。",
+          "hint": "除非 Anthropic 中转站对自定义客户端返回 403，否则保持关闭。",
+          "label": "强制官方 Claude 客户端标头"
         }
       },
       "providerTypes": {

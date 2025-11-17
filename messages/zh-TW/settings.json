@@ -971,7 +971,18 @@
             }
           },
           "hint": "提示：部分嚴格的 Codex 中轉站（如 88code、foxcode）需要官方 instructions，請選擇「自動」或「強制官方」策略"
+        },
+        "spoof": {
+          "label": "強制官方 Codex 客戶端標頭",
+          "desc": "當上游拒絕部分客戶端時，覆寫 User-Agent 與 originator 以模擬官方 Codex CLI。",
+          "hint": "僅在供應商對非官方客戶端返回 403 時啟用，官方 Codex CLI 呼叫不會被修改。"
         }
+      },
+      "claudeSpoof": {
+        "title": "Claude 客戶端偽裝",
+        "desc": "當 Anthropic 端要求官方身分時，模擬官方 Claude CLI 的 User-Agent。",
+        "hint": "除非 Anthropic 中轉站對自訂客戶端回傳 403，否則保持關閉。",
+        "label": "強制官方 Claude 客戶端標頭"
       },
       "providerTypes": {
         "claude": "Claude (Anthropic Messages API)",

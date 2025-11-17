@@ -1046,7 +1046,18 @@
             }
           },
           "hint": "Hint: Some strict Codex gateways (e.g. 88code, foxcode) require official instructions. Choose \"Auto\" or \"Force official\"."
+        },
+        "spoof": {
+          "label": "Force official Codex client headers",
+          "desc": "When the upstream rejects some clients, overwrite User-Agent and originator to simulate the official Codex CLI.",
+          "hint": "Enable only if Codex providers return 403 for custom clients; official Codex CLI requests remain untouched."
         }
+      },
+      "claudeSpoof": {
+        "title": "Claude Client Spoofing",
+        "desc": "Mimic the official Claude CLI User-Agent when upstream Anthropic endpoints require it.",
+        "hint": "Keep disabled unless your Anthropic relay rejects custom clients with 403 errors.",
+        "label": "Force official Claude client headers"
       },
       "providerTypes": {
         "claude": "Claude (Anthropic Messages API)",

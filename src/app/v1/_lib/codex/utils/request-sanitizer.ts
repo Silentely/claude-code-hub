@@ -12,6 +12,10 @@ import { logger } from "@/lib/logger";
 import { getDefaultInstructions } from "../../codex/constants/codex-instructions";
 import { CodexInstructionsCache } from "@/lib/codex-instructions-cache";
 
+export const DEFAULT_CODEX_CLIENT_USER_AGENT =
+  "codex_cli_rs/0.58.0 (Mac OS 26.1.0; arm64) Apple_Terminal/465";
+export const DEFAULT_CODEX_CLIENT_ORIGINATOR = "codex_cli_rs";
+
 /**
  * 功能开关：是否启用 Codex Instructions 注入
  *

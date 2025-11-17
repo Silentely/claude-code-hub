@@ -124,6 +124,8 @@ export const CreateProviderSchema = z.object({
     .enum(["auto", "force_official", "keep_original"])
     .optional()
     .default("auto"),
+  codex_client_spoofing: z.boolean().optional().default(false),
+  claude_client_spoofing: z.boolean().optional().default(false),
   // 金额限流配置
   limit_5h_usd: z.coerce
     .number()
@@ -219,6 +221,8 @@ export const UpdateProviderSchema = z
     join_claude_pool: z.boolean().optional(),
     join_codex_pool: z.boolean().optional(),
     codex_instructions_strategy: z.enum(["auto", "force_official", "keep_original"]).optional(),
+    codex_client_spoofing: z.boolean().optional(),
+    claude_client_spoofing: z.boolean().optional(),
     // 金额限流配置
     limit_5h_usd: z.coerce
       .number()

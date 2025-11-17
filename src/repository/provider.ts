@@ -25,6 +25,8 @@ export async function createProvider(providerData: CreateProviderData): Promise<
     joinClaudePool: providerData.join_claude_pool ?? false,
     joinCodexPool: providerData.join_codex_pool ?? false,
     codexInstructionsStrategy: providerData.codex_instructions_strategy ?? "auto",
+    codexClientSpoofing: providerData.codex_client_spoofing ?? false,
+    claudeClientSpoofing: providerData.claude_client_spoofing ?? false,
     limit5hUsd: providerData.limit_5h_usd != null ? providerData.limit_5h_usd.toString() : null,
     limitWeeklyUsd:
       providerData.limit_weekly_usd != null ? providerData.limit_weekly_usd.toString() : null,
@@ -61,6 +63,8 @@ export async function createProvider(providerData: CreateProviderData): Promise<
     joinClaudePool: providers.joinClaudePool,
     joinCodexPool: providers.joinCodexPool,
     codexInstructionsStrategy: providers.codexInstructionsStrategy,
+    codexClientSpoofing: providers.codexClientSpoofing,
+    claudeClientSpoofing: providers.claudeClientSpoofing,
     limit5hUsd: providers.limit5hUsd,
     limitWeeklyUsd: providers.limitWeeklyUsd,
     limitMonthlyUsd: providers.limitMonthlyUsd,
@@ -104,6 +108,8 @@ export async function findProviderList(
       allowedModels: providers.allowedModels,
       joinClaudePool: providers.joinClaudePool,
       codexInstructionsStrategy: providers.codexInstructionsStrategy,
+      codexClientSpoofing: providers.codexClientSpoofing,
+      claudeClientSpoofing: providers.claudeClientSpoofing,
       limit5hUsd: providers.limit5hUsd,
       limitWeeklyUsd: providers.limitWeeklyUsd,
       limitMonthlyUsd: providers.limitMonthlyUsd,
@@ -154,6 +160,8 @@ export async function findProviderById(id: number): Promise<Provider | null> {
       allowedModels: providers.allowedModels,
       joinClaudePool: providers.joinClaudePool,
       codexInstructionsStrategy: providers.codexInstructionsStrategy,
+      codexClientSpoofing: providers.codexClientSpoofing,
+      claudeClientSpoofing: providers.claudeClientSpoofing,
       limit5hUsd: providers.limit5hUsd,
       limitWeeklyUsd: providers.limitWeeklyUsd,
       limitMonthlyUsd: providers.limitMonthlyUsd,
@@ -212,6 +220,10 @@ export async function updateProvider(
     dbData.joinCodexPool = providerData.join_codex_pool;
   if (providerData.codex_instructions_strategy !== undefined)
     dbData.codexInstructionsStrategy = providerData.codex_instructions_strategy;
+  if (providerData.codex_client_spoofing !== undefined)
+    dbData.codexClientSpoofing = providerData.codex_client_spoofing;
+  if (providerData.claude_client_spoofing !== undefined)
+    dbData.claudeClientSpoofing = providerData.claude_client_spoofing;
   if (providerData.limit_5h_usd !== undefined)
     dbData.limit5hUsd =
       providerData.limit_5h_usd != null ? providerData.limit_5h_usd.toString() : null;

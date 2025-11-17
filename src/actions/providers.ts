@@ -122,6 +122,8 @@ export async function getProviders(): Promise<ProviderDisplay[]> {
         joinClaudePool: provider.joinClaudePool,
         joinCodexPool: provider.joinCodexPool,
         codexInstructionsStrategy: provider.codexInstructionsStrategy,
+        codexClientSpoofing: provider.codexClientSpoofing,
+        claudeClientSpoofing: provider.claudeClientSpoofing,
         limit5hUsd: provider.limit5hUsd,
         limitWeeklyUsd: provider.limitWeeklyUsd,
         limitMonthlyUsd: provider.limitMonthlyUsd,
@@ -185,6 +187,8 @@ export async function addProvider(data: {
   proxy_fallback_to_direct?: boolean;
   website_url?: string | null;
   codex_instructions_strategy?: "auto" | "force_official" | "keep_original";
+  codex_client_spoofing?: boolean;
+  claude_client_spoofing?: boolean;
   tpm: number | null;
   rpm: number | null;
   rpd: number | null;
@@ -312,6 +316,8 @@ export async function editProvider(
     proxy_fallback_to_direct?: boolean;
     website_url?: string | null;
     codex_instructions_strategy?: "auto" | "force_official" | "keep_original";
+    codex_client_spoofing?: boolean;
+    claude_client_spoofing?: boolean;
     tpm?: number | null;
     rpm?: number | null;
     rpd?: number | null;

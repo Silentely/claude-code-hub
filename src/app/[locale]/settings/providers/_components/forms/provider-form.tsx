@@ -94,8 +94,14 @@ export function ProviderForm({
   const [joinClaudePool, setJoinClaudePool] = useState<boolean>(
     sourceProvider?.joinClaudePool ?? false
   );
-  const [joinCodexPool, setJoinCodexPool] = useState<boolean>(
-    sourceProvider?.joinCodexPool ?? false
+  const [joinCodexPool, setJoinCodexPool] = useState<boolean>(sourceProvider?.joinCodexPool ?? false);
+
+  // 客户端伪装开关（默认 false，由供应商级别控制）
+  const [codexClientSpoofing, setCodexClientSpoofing] = useState<boolean>(
+    sourceProvider?.codexClientSpoofing ?? false
+  );
+  const [claudeClientSpoofing, setClaudeClientSpoofing] = useState<boolean>(
+    sourceProvider?.claudeClientSpoofing ?? false
   );
 
   // 熔断器配置（以分钟为单位显示，提交时转换为毫秒）
@@ -240,6 +246,8 @@ export function ProviderForm({
             proxy_fallback_to_direct?: boolean;
             website_url?: string | null;
             codex_instructions_strategy?: CodexInstructionsStrategy;
+            codex_client_spoofing?: boolean;
+            claude_client_spoofing?: boolean;
             tpm?: number | null;
             rpm?: number | null;
             rpd?: number | null;
@@ -269,6 +277,8 @@ export function ProviderForm({
             proxy_fallback_to_direct: proxyFallbackToDirect,
             website_url: websiteUrl.trim() || null,
             codex_instructions_strategy: codexInstructionsStrategy,
+            codex_client_spoofing: codexClientSpoofing,
+            claude_client_spoofing: claudeClientSpoofing,
             tpm: null,
             rpm: null,
             rpd: null,
@@ -311,6 +321,8 @@ export function ProviderForm({
             proxy_fallback_to_direct: proxyFallbackToDirect,
             website_url: websiteUrl.trim() || null,
             codex_instructions_strategy: codexInstructionsStrategy,
+            codex_client_spoofing: codexClientSpoofing,
+            claude_client_spoofing: claudeClientSpoofing,
             tpm: null,
             rpm: null,
             rpd: null,
@@ -1190,10 +1202,55 @@ export function ProviderForm({
                   <p className="text-xs text-muted-foreground">
                     {t("sections.codexStrategy.hint")}
                   </p>
+                  <div className="space-y-2 rounded-md border border-border p-3">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="codex-client-spoofing">
+                          {t("sections.codexStrategy.spoof.label")}
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          {t("sections.codexStrategy.spoof.desc")}
+                        </p>
+                      </div>
+                      <Switch
+                        id="codex-client-spoofing"
+                        checked={codexClientSpoofing}
+                        onCheckedChange={setCodexClientSpoofing}
+                        disabled={isPending}
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {t("sections.codexStrategy.spoof.hint")}
+                    </p>
+                  </div>
                 </div>
               </div>
             </CollapsibleContent>
           </Collapsible>
+        )}
+
+        {(providerType === "claude" || providerType === "claude-auth") && (
+          <div className="space-y-2 rounded-lg border border-border p-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <div className="text-sm font-medium">
+                  {t("sections.claudeSpoof.title")}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {t("sections.claudeSpoof.desc")}
+                </p>
+              </div>
+              <Switch
+                id="claude-client-spoofing"
+                checked={claudeClientSpoofing}
+                onCheckedChange={setClaudeClientSpoofing}
+                disabled={isPending}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {t("sections.claudeSpoof.hint")}
+            </p>
+          </div>
         )}
 
         {isEdit ? (
