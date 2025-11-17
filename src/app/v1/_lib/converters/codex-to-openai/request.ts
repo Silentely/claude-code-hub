@@ -303,6 +303,17 @@ export function transformCodexRequestToOpenAI(
     output.tools = [];
 
     for (const tool of req.tools) {
+      const trimmedName = (tool.name || "").trim();
+
+      // 过滤空名称工具，避免上游报 Invalid 'tools[].function.name'
+      if (!trimmedName) {
+        logger.warn("[Codex→OpenAI] Skipped tool with empty name", {
+          tool,
+          toolsCount: req.tools.length,
+        });
+        continue;
+      }
+
       const openAITool: {
         type: string;
         function: {
@@ -313,7 +324,7 @@ export function transformCodexRequestToOpenAI(
       } = {
         type: "function",
         function: {
-          name: tool.name || "",
+          name: trimmedName,
           parameters: tool.parameters || tool.parametersJsonSchema || {},
         },
       };
