@@ -331,7 +331,7 @@ export function ApiTestButton({
       {/* 显示详细测试结果 */}
       {testResult && !isTesting && (
         <div
-          className={`text-xs p-3 rounded-md ${
+          className={`text-xs p-3 rounded-md max-h-80 overflow-auto whitespace-pre-wrap break-words ${
             testResult.success
               ? "bg-green-50 text-green-700 border border-green-200"
               : "bg-red-50 text-red-700 border border-red-200"
@@ -339,7 +339,7 @@ export function ApiTestButton({
         >
           <div className="font-medium mb-2">{testResult.message}</div>
           {testResult.details && (
-            <div className="space-y-1 text-xs opacity-80">
+            <div className="space-y-2 text-xs opacity-80">
               {testResult.details.model && (
                 <div>
                   <span className="font-medium">{t("model")}:</span> {testResult.details.model}
@@ -352,22 +352,29 @@ export function ApiTestButton({
                 </div>
               )}
               {testResult.details.usage && (
-                <div>
-                  <span className="font-medium">{t("usage")}:</span>{" "}
-                  {typeof testResult.details.usage === "object"
-                    ? JSON.stringify(testResult.details.usage)
-                    : String(testResult.details.usage)}
+                <div className="space-y-1">
+                  <span className="font-medium">{t("usage")}:</span>
+                  <pre className="whitespace-pre-wrap break-words bg-white/60 text-xs rounded-sm p-2 border border-border/40">
+                    {typeof testResult.details.usage === "object"
+                      ? JSON.stringify(testResult.details.usage, null, 2)
+                      : String(testResult.details.usage)}
+                  </pre>
                 </div>
               )}
               {testResult.details.content && (
-                <div>
-                  <span className="font-medium">{t("response")}:</span>{" "}
-                  {testResult.details.content}
+                <div className="space-y-1">
+                  <span className="font-medium">{t("response")}:</span>
+                  <pre className="whitespace-pre-wrap break-words bg-white/60 text-xs rounded-sm p-2 border border-border/40">
+                    {testResult.details.content}
+                  </pre>
                 </div>
               )}
               {testResult.details.error && (
-                <div>
-                  <span className="font-medium">{t("error")}:</span> {testResult.details.error}
+                <div className="space-y-1">
+                  <span className="font-medium">{t("error")}:</span>
+                  <pre className="whitespace-pre-wrap break-words bg-white/60 text-xs rounded-sm p-2 border border-border/40">
+                    {testResult.details.error}
+                  </pre>
                 </div>
               )}
             </div>
