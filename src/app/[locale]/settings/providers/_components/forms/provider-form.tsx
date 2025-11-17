@@ -94,7 +94,9 @@ export function ProviderForm({
   const [joinClaudePool, setJoinClaudePool] = useState<boolean>(
     sourceProvider?.joinClaudePool ?? false
   );
-  const [joinCodexPool, setJoinCodexPool] = useState<boolean>(sourceProvider?.joinCodexPool ?? false);
+  const [joinCodexPool, setJoinCodexPool] = useState<boolean>(
+    sourceProvider?.joinCodexPool ?? false
+  );
 
   // 客户端伪装开关（默认 false，由供应商级别控制）
   const [codexClientSpoofing, setCodexClientSpoofing] = useState<boolean>(
@@ -132,7 +134,13 @@ export function ProviderForm({
     useState<CodexInstructionsStrategy>(sourceProvider?.codexInstructionsStrategy ?? "auto");
 
   // 折叠区域状态管理
-  type SectionKey = "routing" | "rateLimit" | "circuitBreaker" | "proxy" | "apiTest" | "codexStrategy";
+  type SectionKey =
+    | "routing"
+    | "rateLimit"
+    | "circuitBreaker"
+    | "proxy"
+    | "apiTest"
+    | "codexStrategy";
   const [openSections, setOpenSections] = useState<Record<SectionKey, boolean>>({
     routing: false,
     rateLimit: false,
@@ -520,8 +528,7 @@ export function ProviderForm({
                     </SelectItem>
                     <SelectItem value="gemini-cli" disabled={true}>
                       <>
-                        {t("providerTypes.geminiCli")}{" "}
-                        {t("providerTypes.geminiCliDisabled")}
+                        {t("providerTypes.geminiCli")} {t("providerTypes.geminiCliDisabled")}
                       </>
                     </SelectItem>
                   </SelectContent>
@@ -753,10 +760,7 @@ export function ProviderForm({
         </Collapsible>
 
         {/* 限流配置 */}
-        <Collapsible
-          open={openSections.rateLimit}
-          onOpenChange={() => toggleSection("rateLimit")}
-        >
+        <Collapsible open={openSections.rateLimit} onOpenChange={() => toggleSection("rateLimit")}>
           <CollapsibleTrigger asChild>
             <button
               type="button"
@@ -1063,10 +1067,7 @@ export function ProviderForm({
         </Collapsible>
 
         {/* API 测试 */}
-        <Collapsible
-          open={openSections.apiTest}
-          onOpenChange={() => toggleSection("apiTest")}
-        >
+        <Collapsible open={openSections.apiTest} onOpenChange={() => toggleSection("apiTest")}>
           <CollapsibleTrigger asChild>
             <button
               type="button"
@@ -1081,17 +1082,13 @@ export function ProviderForm({
                 />
                 <span className="text-sm font-medium">{t("sections.apiTest.title")}</span>
               </div>
-              <span className="text-xs text-muted-foreground">
-                {t("sections.apiTest.summary")}
-              </span>
+              <span className="text-xs text-muted-foreground">{t("sections.apiTest.summary")}</span>
             </button>
           </CollapsibleTrigger>
           <CollapsibleContent className="space-y-4 pb-4">
             <div className="space-y-4">
               <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">
-                  {t("sections.apiTest.desc")}
-                </p>
+                <p className="text-xs text-muted-foreground">{t("sections.apiTest.desc")}</p>
               </div>
 
               <div className="space-y-2">
@@ -1106,9 +1103,7 @@ export function ProviderForm({
                   enableMultiProviderTypes={enableMultiProviderTypes}
                   disabled={isPending || !url.trim()}
                 />
-                <p className="text-xs text-muted-foreground">
-                  {t("sections.apiTest.notice")}
-                </p>
+                <p className="text-xs text-muted-foreground">{t("sections.apiTest.notice")}</p>
               </div>
             </div>
           </CollapsibleContent>
@@ -1211,9 +1206,7 @@ export function ProviderForm({
           <div className="space-y-2 rounded-lg border border-border p-4">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <div className="text-sm font-medium">
-                  {t("sections.codexStrategy.spoof.label")}
-                </div>
+                <div className="text-sm font-medium">{t("sections.codexStrategy.spoof.label")}</div>
                 <p className="text-xs text-muted-foreground">
                   {t("sections.codexStrategy.spoof.desc")}
                 </p>
@@ -1237,12 +1230,8 @@ export function ProviderForm({
           <div className="space-y-2 rounded-lg border border-border p-4">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <div className="text-sm font-medium">
-                  {t("sections.claudeSpoof.title")}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {t("sections.claudeSpoof.desc")}
-                </p>
+                <div className="text-sm font-medium">{t("sections.claudeSpoof.title")}</div>
+                <p className="text-xs text-muted-foreground">{t("sections.claudeSpoof.desc")}</p>
               </div>
               <Switch
                 id="claude-client-spoofing"
@@ -1251,9 +1240,7 @@ export function ProviderForm({
                 disabled={isPending}
               />
             </div>
-            <p className="text-xs text-muted-foreground">
-              {t("sections.claudeSpoof.hint")}
-            </p>
+            <p className="text-xs text-muted-foreground">{t("sections.claudeSpoof.hint")}</p>
           </div>
         )}
 

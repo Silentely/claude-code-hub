@@ -633,7 +633,6 @@ export class ProxyForwarder {
       }
     }
 
-
     // Codex 请求清洗（即使格式相同也要执行，除非是官方客户端）
     // 目的：确保非官方客户端的请求也能通过 Codex 供应商的校验
     // - 替换 instructions 为官方完整 prompt
@@ -728,10 +727,7 @@ export class ProxyForwarder {
 
     // OpenAI Compatible 供应商：使用 /v1/chat/completions 端点
     // 将 Claude 的 /v1/messages 和 Codex 的 /v1/responses 路径重写为 OpenAI 标准端点
-    if (
-      toFormat === "openai-compatible" &&
-      (fromFormat === "claude" || fromFormat === "codex")
-    ) {
+    if (toFormat === "openai-compatible" && (fromFormat === "claude" || fromFormat === "codex")) {
       forwardUrl = new URL(session.requestUrl);
       const originalPath = forwardUrl.pathname;
 
@@ -1027,16 +1023,13 @@ export class ProxyForwarder {
         overrides["originator"] = DEFAULT_CODEX_CLIENT_ORIGINATOR;
       }
 
-      logger.debug(
-        "ProxyForwarder: Codex provider detected, applying client spoofing policy",
-        {
-          originalUA: session.userAgent ? "provided" : "fallback",
-          spoofingEnabled,
-          spoofed: shouldSpoof,
-          officialClient,
-          inboundOriginator: inboundOriginator ? "provided" : "missing",
-        }
-      );
+      logger.debug("ProxyForwarder: Codex provider detected, applying client spoofing policy", {
+        originalUA: session.userAgent ? "provided" : "fallback",
+        spoofingEnabled,
+        spoofed: shouldSpoof,
+        officialClient,
+        inboundOriginator: inboundOriginator ? "provided" : "missing",
+      });
     }
 
     // Claude 供应商伪装：根据供应商级别配置，必要时伪装成官方 Claude CLI
@@ -1045,13 +1038,10 @@ export class ProxyForwarder {
       if (spoofingEnabled) {
         const originalUA = session.userAgent || "";
         overrides["user-agent"] = originalUA || "claude-cli/2.0.0 (external, cli)";
-        logger.debug(
-          "ProxyForwarder: Claude provider detected, applying client spoofing policy",
-          {
-            originalUA: session.userAgent ? "provided" : "fallback",
-            spoofingEnabled,
-          }
-        );
+        logger.debug("ProxyForwarder: Claude provider detected, applying client spoofing policy", {
+          originalUA: session.userAgent ? "provided" : "fallback",
+          spoofingEnabled,
+        });
       }
     }
 

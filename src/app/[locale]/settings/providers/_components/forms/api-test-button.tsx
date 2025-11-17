@@ -287,9 +287,7 @@ export function ApiTestButton({
             <SelectValue placeholder={t("selectApiFormat")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="anthropic-messages">
-              {t("formatAnthropicMessages")}
-            </SelectItem>
+            <SelectItem value="anthropic-messages">{t("formatAnthropicMessages")}</SelectItem>
             <SelectItem value="openai-chat">{t("formatOpenAIChat")}</SelectItem>
             <SelectItem value="openai-responses">{t("formatOpenAIResponses")}</SelectItem>
           </SelectContent>
@@ -318,12 +316,7 @@ export function ApiTestButton({
         variant="outline"
         size="sm"
         onClick={handleTest}
-        disabled={
-          disabled ||
-          isTesting ||
-          !providerUrl.trim() ||
-          (!apiKey.trim() && !providerId)
-        }
+        disabled={disabled || isTesting || !providerUrl.trim() || (!apiKey.trim() && !providerId)}
       >
         {getButtonContent()}
       </Button>
@@ -362,11 +355,8 @@ export function ApiTestButton({
                 </div>
               )}
               {testResult.details.content && (
-                <div className="space-y-1">
-                  <span className="font-medium">{t("response")}:</span>
-                  <pre className="whitespace-pre-wrap break-words bg-white/60 text-xs rounded-sm p-2 border border-border/40">
-                    {testResult.details.content}
-                  </pre>
+                <div>
+                  <span className="font-medium">{t("response")}:</span> {testResult.details.content}
                 </div>
               )}
               {testResult.details.error && (
