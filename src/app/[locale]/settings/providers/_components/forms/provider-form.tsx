@@ -595,39 +595,40 @@ export function ProviderForm({
                 })()}
 
               {/* joinCodexPool 开关 - 仅 openai-compatible 供应商显示 */}
-              {providerType === "openai-compatible" && (() => {
-                const hasCodexRedirects = Object.keys(modelRedirects).some((key) =>
-                  key.trim().toLowerCase().endsWith("-codex")
-                );
+              {providerType === "openai-compatible" &&
+                (() => {
+                  const hasCodexRedirects = Object.keys(modelRedirects).some((key) =>
+                    key.trim().toLowerCase().endsWith("-codex")
+                  );
 
-                return (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <Label htmlFor={isEdit ? "edit-join-codex-pool" : "join-codex-pool"}>
-                          {t("sections.routing.joinCodexPool.label")}
-                        </Label>
-                        <p className="text-xs text-muted-foreground">
-                          {t("sections.routing.joinCodexPool.desc")}
-                        </p>
+                  return (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <Label htmlFor={isEdit ? "edit-join-codex-pool" : "join-codex-pool"}>
+                            {t("sections.routing.joinCodexPool.label")}
+                          </Label>
+                          <p className="text-xs text-muted-foreground">
+                            {t("sections.routing.joinCodexPool.desc")}
+                          </p>
+                        </div>
+                        <Switch
+                          id={isEdit ? "edit-join-codex-pool" : "join-codex-pool"}
+                          checked={joinCodexPool}
+                          onCheckedChange={setJoinCodexPool}
+                          disabled={isPending || !hasCodexRedirects}
+                        />
                       </div>
-                      <Switch
-                        id={isEdit ? "edit-join-codex-pool" : "join-codex-pool"}
-                        checked={joinCodexPool}
-                        onCheckedChange={setJoinCodexPool}
-                        disabled={isPending || !hasCodexRedirects}
-                      />
+                      <p
+                        className={`text-xs ${
+                          hasCodexRedirects ? "text-muted-foreground" : "text-amber-600"
+                        }`}
+                      >
+                        {t("sections.routing.joinCodexPool.help")}
+                      </p>
                     </div>
-                    <p
-                      className={`text-xs ${
-                        hasCodexRedirects ? "text-muted-foreground" : "text-amber-600"
-                      }`}
-                    >
-                      {t("sections.routing.joinCodexPool.help")}
-                    </p>
-                  </div>
-                );
-              })()}
+                  );
+                })()}
 
               {/* 模型白名单配置 */}
               <div className="space-y-1">
