@@ -88,27 +88,32 @@ class ErrorRuleDetector {
 
     // 避免并发初始化
     if (this.isLoading) {
-      // 等待当前加载完成
       while (this.isLoading) {
         await new Promise((resolve) => setTimeout(resolve, 100));
       }
-      return;
+
+      if (this.isInitialized) {
+        return;
+      }
     }
 
-    await this.reload();
-    this.isInitialized = true;
+    const reloaded = await this.reload();
+    if (!reloaded) {
+      logger.debug("[ErrorRuleDetector] Initialization deferred due to reload failure");
+    }
   }
 
   /**
    * 从数据库重新加载错误规则
    */
-  async reload(): Promise<void> {
+  async reload(): Promise<boolean> {
     if (this.isLoading) {
       logger.warn("[ErrorRuleDetector] Reload already in progress, skipping");
-      return;
+      return this.isInitialized;
     }
 
     this.isLoading = true;
+    let success = false;
 
     try {
       logger.info("[ErrorRuleDetector] Reloading error rules from database...");
@@ -177,6 +182,7 @@ class ErrorRuleDetector {
 
       this.lastReloadTime = Date.now();
       this.isInitialized = true;
+      success = true;
 
       logger.info(
         `[ErrorRuleDetector] Loaded ${rules.length} error rules: ` +
@@ -194,10 +200,12 @@ class ErrorRuleDetector {
       } else {
         logger.error("[ErrorRuleDetector] Failed to reload error rules:", error);
       }
-      // 失败时不清空现有缓存，保持降级可用
+      success = false;
     } finally {
       this.isLoading = false;
     }
+
+    return success;
   }
 
   /**
