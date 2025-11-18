@@ -2,6 +2,7 @@
 
 import { db } from "@/drizzle/db";
 import { errorRules } from "@/drizzle/schema";
+import { logger } from "@/lib/logger";
 import { eq, desc } from "drizzle-orm";
 
 export interface ErrorRule {
@@ -21,45 +22,69 @@ export interface ErrorRule {
  * 获取所有启用的错误规则（用于缓存加载和运行时检测）
  */
 export async function getActiveErrorRules(): Promise<ErrorRule[]> {
-  const results = await db.query.errorRules.findMany({
-    where: eq(errorRules.isEnabled, true),
-    orderBy: [errorRules.priority, errorRules.category],
-  });
+  try {
+    const results = await db.query.errorRules.findMany({
+      where: eq(errorRules.isEnabled, true),
+      orderBy: [errorRules.priority, errorRules.category],
+    });
 
-  return results.map((r) => ({
-    id: r.id,
-    pattern: r.pattern,
-    matchType: r.matchType as "regex" | "contains" | "exact",
-    category: r.category,
-    description: r.description,
-    isEnabled: r.isEnabled,
-    isDefault: r.isDefault,
-    priority: r.priority,
-    createdAt: r.createdAt ?? new Date(),
-    updatedAt: r.updatedAt ?? new Date(),
-  }));
+    return results.map((r) => ({
+      id: r.id,
+      pattern: r.pattern,
+      matchType: r.matchType as "regex" | "contains" | "exact",
+      category: r.category,
+      description: r.description,
+      isEnabled: r.isEnabled,
+      isDefault: r.isDefault,
+      priority: r.priority,
+      createdAt: r.createdAt ?? new Date(),
+      updatedAt: r.updatedAt ?? new Date(),
+    }));
+  } catch (error) {
+    if (isTableMissingError(error)) {
+      logger.warn(
+        "[ErrorRulesRepository] error_rules table not found when loading active rules. " +
+          "Returning empty result until migrations finish."
+      );
+      return [];
+    }
+
+    throw error;
+  }
 }
 
 /**
  * 获取所有错误规则（包括禁用的）
  */
 export async function getAllErrorRules(): Promise<ErrorRule[]> {
-  const results = await db.query.errorRules.findMany({
-    orderBy: [desc(errorRules.createdAt)],
-  });
+  try {
+    const results = await db.query.errorRules.findMany({
+      orderBy: [desc(errorRules.createdAt)],
+    });
 
-  return results.map((r) => ({
-    id: r.id,
-    pattern: r.pattern,
-    matchType: r.matchType as "regex" | "contains" | "exact",
-    category: r.category,
-    description: r.description,
-    isEnabled: r.isEnabled,
-    isDefault: r.isDefault,
-    priority: r.priority,
-    createdAt: r.createdAt ?? new Date(),
-    updatedAt: r.updatedAt ?? new Date(),
-  }));
+    return results.map((r) => ({
+      id: r.id,
+      pattern: r.pattern,
+      matchType: r.matchType as "regex" | "contains" | "exact",
+      category: r.category,
+      description: r.description,
+      isEnabled: r.isEnabled,
+      isDefault: r.isDefault,
+      priority: r.priority,
+      createdAt: r.createdAt ?? new Date(),
+      updatedAt: r.updatedAt ?? new Date(),
+    }));
+  } catch (error) {
+    if (isTableMissingError(error)) {
+      logger.warn(
+        "[ErrorRulesRepository] error_rules table not found when loading all rules. " +
+          "Returning empty result until migrations finish."
+      );
+      return [];
+    }
+
+    throw error;
+  }
 }
 
 /**
@@ -148,6 +173,70 @@ export async function deleteErrorRule(id: number): Promise<boolean> {
 }
 
 /**
+ * 检测是否为表不存在错误
+ */
+function isTableMissingError(error: unknown, depth = 0): boolean {
+  if (!error || depth > 5) {
+    return false;
+  }
+
+  if (typeof error === "string") {
+    const normalized = error.toLowerCase();
+    return (
+      normalized.includes("42p01") ||
+      (normalized.includes("error_rules") &&
+        (normalized.includes("does not exist") ||
+          normalized.includes("doesn't exist") ||
+          normalized.includes("找不到")))
+    );
+  }
+
+  if (typeof error === "object") {
+    const err = error as {
+      code?: unknown;
+      message?: unknown;
+      cause?: unknown;
+      errors?: unknown;
+      originalError?: unknown;
+    };
+
+    if (typeof err.code === "string" && err.code.toUpperCase() === "42P01") {
+      return true;
+    }
+
+    if (typeof err.message === "string" && isTableMissingError(err.message, depth + 1)) {
+      return true;
+    }
+
+    if ("cause" in err && err.cause && isTableMissingError(err.cause, depth + 1)) {
+      return true;
+    }
+
+    if (Array.isArray(err.errors)) {
+      return err.errors.some((item) => isTableMissingError(item, depth + 1));
+    }
+
+    if (err.originalError && isTableMissingError(err.originalError, depth + 1)) {
+      return true;
+    }
+
+    const stringified = (() => {
+      try {
+        return String(error);
+      } catch {
+        return undefined;
+      }
+    })();
+
+    if (stringified) {
+      return isTableMissingError(stringified, depth + 1);
+    }
+  }
+
+  return false;
+}
+
+/**
  * 初始化默认错误规则
  *
  * 使用 ON CONFLICT DO NOTHING 确保幂等性，避免重复插入
@@ -220,10 +309,29 @@ export async function initializeDefaultErrorRules(): Promise<void> {
     },
   ];
 
-  // 使用事务批量插入，ON CONFLICT DO NOTHING 保证幂等性
-  await db.transaction(async (tx) => {
-    for (const rule of defaultRules) {
-      await tx.insert(errorRules).values(rule).onConflictDoNothing({ target: errorRules.pattern });
+  try {
+    // 使用事务批量插入，ON CONFLICT DO NOTHING 保证幂等性
+    await db.transaction(async (tx) => {
+      for (const rule of defaultRules) {
+        await tx
+          .insert(errorRules)
+          .values(rule)
+          .onConflictDoNothing({ target: errorRules.pattern });
+      }
+    });
+  } catch (error) {
+    // 检查是否是表不存在错误（数据库迁移未完成）
+    if (isTableMissingError(error)) {
+      // 这是预期的情况：迁移尚未完成，降级处理
+      // 使用 warn 级别，因为这不是致命错误，应用仍可继续启动
+      logger.warn(
+        "[initializeDefaultErrorRules] error_rules table not found, database migration may not be complete yet. " +
+          "Error rules will be initialized when migration completes."
+      );
+      return;
     }
-  });
+
+    // 其他错误应该抛出，让调用方知道有问题
+    throw error;
+  }
 }
