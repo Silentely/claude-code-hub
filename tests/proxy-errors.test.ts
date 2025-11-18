@@ -18,10 +18,9 @@ import { describe, test, expect, beforeAll } from "bun:test";
 import { ProxyError, isNonRetryableClientError } from "@/app/v1/_lib/proxy/errors";
 import { errorRuleDetector } from "@/lib/error-rule-detector";
 
-// Wait for initial cache load
+// Ensure initial cache load before running tests
 beforeAll(async () => {
-  // Give ErrorRuleDetector time to initialize cache from database
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  await errorRuleDetector.reload();
 });
 
 describe("isNonRetryableClientError - 7 Default Rules", () => {

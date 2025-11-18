@@ -8,6 +8,8 @@
  * - 支持热重载
  * - ReDoS 风险检测（safe-regex）
  * - EventEmitter 驱动的自动缓存刷新
+ * - 延迟初始化，避免与数据库迁移竞争
+ * - 优雅降级，迁移未完成时返回未匹配
  */
 
 import { getActiveErrorRules } from "@/repository/error-rules";
@@ -61,12 +63,11 @@ class ErrorRuleDetector {
   private exactPatterns: Map<string, ExactPattern> = new Map();
   private lastReloadTime: number = 0;
   private isLoading: boolean = false;
+  private isInitialized: boolean = false;
 
   constructor() {
-    // 初始化时立即加载缓存（异步，不阻塞构造函数）
-    this.reload().catch((error) => {
-      logger.error("[ErrorRuleDetector] Failed to initialize cache:", error);
-    });
+    // 延迟初始化：不在构造函数中加载，避免与数据库迁移竞争
+    // 首次 detect() 调用时会触发 ensureInitialized()
 
     // 监听数据库变更事件，自动刷新缓存
     eventEmitter.on("errorRulesUpdated", () => {
@@ -74,6 +75,28 @@ class ErrorRuleDetector {
         logger.error("[ErrorRuleDetector] Failed to reload cache on event:", error);
       });
     });
+  }
+
+  /**
+   * 确保已初始化（延迟加载）
+   * 在首次调用 detect() 时触发
+   */
+  private async ensureInitialized(): Promise<void> {
+    if (this.isInitialized) {
+      return;
+    }
+
+    // 避免并发初始化
+    if (this.isLoading) {
+      // 等待当前加载完成
+      while (this.isLoading) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+      return;
+    }
+
+    await this.reload();
+    this.isInitialized = true;
   }
 
   /**
@@ -153,6 +176,7 @@ class ErrorRuleDetector {
       }
 
       this.lastReloadTime = Date.now();
+      this.isInitialized = true;
 
       logger.info(
         `[ErrorRuleDetector] Loaded ${rules.length} error rules: ` +
@@ -160,7 +184,16 @@ class ErrorRuleDetector {
           `regex=${validRegexCount}${skippedRedosCount > 0 ? ` (skipped ${skippedRedosCount} ReDoS)` : ""}`
       );
     } catch (error) {
-      logger.error("[ErrorRuleDetector] Failed to reload error rules:", error);
+      // 检查是否是表不存在错误（数据库迁移未完成）
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('relation "error_rules" does not exist')) {
+        logger.warn(
+          "[ErrorRuleDetector] error_rules table not found, database migration may not be complete yet. " +
+            "Error rules will be disabled until migration completes."
+        );
+      } else {
+        logger.error("[ErrorRuleDetector] Failed to reload error rules:", error);
+      }
       // 失败时不清空现有缓存，保持降级可用
     } finally {
       this.isLoading = false;
@@ -178,7 +211,65 @@ class ErrorRuleDetector {
    * @param errorMessage - 错误消息
    * @returns 检测结果
    */
+  async detectAsync(errorMessage: string): Promise<ErrorDetectionResult> {
+    if (!errorMessage || errorMessage.length === 0) {
+      return { matched: false };
+    }
+
+    await this.ensureInitialized();
+
+    const lowerMessage = errorMessage.toLowerCase();
+    const trimmedMessage = lowerMessage.trim();
+
+    // 1. 包含匹配（最快）
+    for (const pattern of this.containsPatterns) {
+      if (lowerMessage.includes(pattern.text)) {
+        return {
+          matched: true,
+          category: pattern.category,
+          pattern: pattern.text,
+          matchType: "contains",
+        };
+      }
+    }
+
+    // 2. 精确匹配（O(1) 查询）
+    const exactMatch = this.exactPatterns.get(trimmedMessage);
+    if (exactMatch) {
+      return {
+        matched: true,
+        category: exactMatch.category,
+        pattern: exactMatch.text,
+        matchType: "exact",
+      };
+    }
+
+    // 3. 正则匹配（最慢，但最灵活）
+    for (const { pattern, category } of this.regexPatterns) {
+      if (pattern.test(errorMessage)) {
+        return {
+          matched: true,
+          category,
+          pattern: pattern.source,
+          matchType: "regex",
+        };
+      }
+    }
+
+    return { matched: false };
+  }
+
   detect(errorMessage: string): ErrorDetectionResult {
+    // 保持向后兼容的同步接口，当未初始化时返回未匹配
+    if (!this.isInitialized) {
+      // 异步触发初始化，但不阻塞当前调用
+      this.ensureInitialized().catch((error) => {
+        logger.error("[ErrorRuleDetector] Failed to initialize during sync detect:", error);
+      });
+
+      return { matched: false };
+    }
+
     if (!errorMessage || errorMessage.length === 0) {
       return { matched: false };
     }

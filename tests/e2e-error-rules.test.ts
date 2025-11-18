@@ -32,8 +32,8 @@ const mockAdminSession = {
 let createdRuleId: number | null = null;
 
 beforeAll(async () => {
-  // Wait for initial cache load
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  // Ensure initial cache load before running tests
+  await errorRuleDetector.reload();
 });
 
 afterAll(async () => {

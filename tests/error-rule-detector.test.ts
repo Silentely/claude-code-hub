@@ -20,9 +20,9 @@ import { describe, test, expect, beforeAll } from "bun:test";
 import { errorRuleDetector } from "@/lib/error-rule-detector";
 import { eventEmitter } from "@/lib/event-emitter";
 
-// Wait for initial cache load
+// Ensure initial cache load before running tests
 beforeAll(async () => {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  await errorRuleDetector.reload();
 });
 
 describe("ErrorRuleDetector Manual Reload", () => {

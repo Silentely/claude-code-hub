@@ -45,6 +45,15 @@ export async function register() {
         logger.error("Failed to initialize default error rules:", error);
       }
 
+      // 初始化错误规则检测器缓存（在默认规则创建后加载）
+      const { errorRuleDetector } = await import("@/lib/error-rule-detector");
+      try {
+        await errorRuleDetector.reload();
+        logger.info("Error rule detector cache initialized successfully");
+      } catch (error) {
+        logger.error("Failed to initialize error rule detector cache:", error);
+      }
+
       // 初始化日志清理任务队列（如果启用）
       const { scheduleAutoCleanup } = await import("@/lib/log-cleanup/cleanup-queue");
       await scheduleAutoCleanup();
@@ -79,6 +88,15 @@ export async function register() {
         logger.info("Default error rules initialized successfully");
       } catch (error) {
         logger.error("Failed to initialize default error rules:", error);
+      }
+
+      // 初始化错误规则检测器缓存（在默认规则创建后加载）
+      const { errorRuleDetector } = await import("@/lib/error-rule-detector");
+      try {
+        await errorRuleDetector.reload();
+        logger.info("Error rule detector cache initialized successfully");
+      } catch (error) {
+        logger.error("Failed to initialize error rule detector cache:", error);
       }
 
       // ⚠️ 开发环境禁用通知队列（Bull + Turbopack 不兼容）
