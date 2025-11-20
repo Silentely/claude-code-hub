@@ -7,6 +7,64 @@ import type { Key, CreateKeyData, UpdateKeyData } from "@/types/key";
 import type { User } from "@/types/user";
 import { toKey, toUser } from "./_shared/transformers";
 import { Decimal, toCostDecimal } from "@/lib/utils/currency";
+import { logger } from "@/lib/logger";
+
+// 用户配额列缓存（与 user.ts 共享相同的检测逻辑）
+const USER_QUOTA_COLUMNS = [
+  "limit_5h_usd",
+  "limit_weekly_usd",
+  "limit_monthly_usd",
+  "limit_concurrent_sessions",
+] as const;
+
+let userQuotaColumnsAvailable: boolean | null = null;
+let checkingUserQuotaColumns: Promise<boolean> | null = null;
+
+async function ensureUserQuotaColumnsAvailability(): Promise<boolean> {
+  if (userQuotaColumnsAvailable !== null) {
+    return userQuotaColumnsAvailable;
+  }
+
+  if (!checkingUserQuotaColumns) {
+    checkingUserQuotaColumns = (async () => {
+      try {
+        const result = await db.execute<{ count: number }>(sql`
+          SELECT COUNT(*)::int AS count
+          FROM information_schema.columns
+          WHERE table_schema = current_schema()
+            AND table_name = 'users'
+            AND column_name IN (${sql.join(
+              USER_QUOTA_COLUMNS.map((columnName) => sql`${columnName}`),
+              sql`, `
+            )})
+        `);
+
+        const rows = Array.from(result) as Array<{ count: number }>;
+        const count = Number(rows[0]?.count ?? 0);
+        const available = count === USER_QUOTA_COLUMNS.length;
+
+        if (!available) {
+          logger.warn(
+            "[key.ts] User quota columns are missing in database. Please run the latest migrations (0020_next_juggernaut)."
+          );
+        }
+
+        userQuotaColumnsAvailable = available;
+        return available;
+      } catch (error) {
+        logger.error("[key.ts] Failed to determine user quota columns availability", {
+          error,
+        });
+        userQuotaColumnsAvailable = false;
+        return false;
+      } finally {
+        checkingUserQuotaColumns = null;
+      }
+    })();
+  }
+
+  return checkingUserQuotaColumns!;
+}
 
 export async function findKeyById(id: number): Promise<Key | null> {
   const [key] = await db
@@ -268,6 +326,9 @@ export async function findActiveKeyByKeyString(keyString: string): Promise<Key |
 export async function validateApiKeyAndGetUser(
   keyString: string
 ): Promise<{ user: User; key: Key } | null> {
+  // 检查 users 表的配额列是否存在
+  const hasUserQuotaCols = await ensureUserQuotaColumnsAvailability();
+
   const result = await db
     .select({
       // Key fields
@@ -285,7 +346,7 @@ export async function validateApiKeyAndGetUser(
       keyCreatedAt: keys.createdAt,
       keyUpdatedAt: keys.updatedAt,
       keyDeletedAt: keys.deletedAt,
-      // User fields
+      // User fields (动态检测配额列是否存在)
       userId: users.id,
       userName: users.name,
       userDescription: users.description,
@@ -293,10 +354,18 @@ export async function validateApiKeyAndGetUser(
       userRpm: users.rpmLimit,
       userDailyQuota: users.dailyLimitUsd,
       userProviderGroup: users.providerGroup,
-      userLimit5hUsd: users.limit5hUsd,
-      userLimitWeeklyUsd: users.limitWeeklyUsd,
-      userLimitMonthlyUsd: users.limitMonthlyUsd,
-      userLimitConcurrentSessions: users.limitConcurrentSessions,
+      userLimit5hUsd: hasUserQuotaCols
+        ? users.limit5hUsd
+        : sql<number | null>`NULL::numeric`.as("userLimit5hUsd"),
+      userLimitWeeklyUsd: hasUserQuotaCols
+        ? users.limitWeeklyUsd
+        : sql<number | null>`NULL::numeric`.as("userLimitWeeklyUsd"),
+      userLimitMonthlyUsd: hasUserQuotaCols
+        ? users.limitMonthlyUsd
+        : sql<number | null>`NULL::numeric`.as("userLimitMonthlyUsd"),
+      userLimitConcurrentSessions: hasUserQuotaCols
+        ? users.limitConcurrentSessions
+        : sql<number | null>`NULL::integer`.as("userLimitConcurrentSessions"),
       userCreatedAt: users.createdAt,
       userUpdatedAt: users.updatedAt,
       userDeletedAt: users.deletedAt,

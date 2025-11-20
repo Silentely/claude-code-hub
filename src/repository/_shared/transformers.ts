@@ -15,10 +15,22 @@ export function toUser(dbUser: any): User {
     rpm: dbUser?.rpm || 60,
     dailyQuota: dbUser?.dailyQuota ? parseFloat(dbUser.dailyQuota) : 0,
     providerGroup: dbUser?.providerGroup ?? null,
-    limit5hUsd: dbUser?.limit5hUsd ? parseFloat(dbUser.limit5hUsd) : null,
-    limitWeeklyUsd: dbUser?.limitWeeklyUsd ? parseFloat(dbUser.limitWeeklyUsd) : null,
-    limitMonthlyUsd: dbUser?.limitMonthlyUsd ? parseFloat(dbUser.limitMonthlyUsd) : null,
-    limitConcurrentSessions: dbUser?.limitConcurrentSessions ?? null,
+    limit5hUsd:
+      dbUser?.limit5hUsd !== undefined && dbUser?.limit5hUsd !== null
+        ? parseFloat(dbUser.limit5hUsd)
+        : null,
+    limitWeeklyUsd:
+      dbUser?.limitWeeklyUsd !== undefined && dbUser?.limitWeeklyUsd !== null
+        ? parseFloat(dbUser.limitWeeklyUsd)
+        : null,
+    limitMonthlyUsd:
+      dbUser?.limitMonthlyUsd !== undefined && dbUser?.limitMonthlyUsd !== null
+        ? parseFloat(dbUser.limitMonthlyUsd)
+        : null,
+    limitConcurrentSessions:
+      dbUser?.limitConcurrentSessions !== undefined && dbUser?.limitConcurrentSessions !== null
+        ? Number(dbUser.limitConcurrentSessions)
+        : null,
     createdAt: dbUser?.createdAt ? new Date(dbUser.createdAt) : new Date(),
     updatedAt: dbUser?.updatedAt ? new Date(dbUser.updatedAt) : new Date(),
   };
