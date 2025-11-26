@@ -243,7 +243,14 @@
       "error": "匯入資料庫失敗",
       "streamError": "無法讀取回應串流",
       "errorUnknown": "未知錯誤",
-      "descriptionFull": "從備份檔案還原資料庫。支援 PostgreSQL custom format (.dump) 格式的備份檔案。"
+      "descriptionFull": "從備份檔案還原資料庫。支援 PostgreSQL custom format (.dump) 格式的備份檔案。",
+      "parseError": "解析响应数据失败",
+      "streamInterrupted": "数据流意外中断",
+      "streamInterruptedDesc": "导入进度未正常完成，请检查日志并验证数据完整性。如有问题，请重新导入。",
+      "successCleanModeDesc": "所有数据已成功恢复。如果页面显示异常，请刷新浏览器。",
+      "successMergeModeDesc": "数据已成功导入并合并。如果页面显示异常，请刷新浏览器。",
+      "successWithWarnings": "数据导入完成（有警告）",
+      "successWithWarningsDesc": "数据已成功导入，但跳过了一些已存在的对象。如果页面显示异常，请刷新浏览器或重启应用。"
     },
     "status": {
       "loading": "載入中...",
@@ -610,7 +617,19 @@
           "realRequest": "測試將向供應商發送真實請求，可能消耗少量額度",
           "resultReference": "<strong>因各家供應商情況不同，測試結果僅供參考，不代表實際呼叫效果</strong>",
           "confirmConfig": "請確認供應商 URL、API 金鑰及模型設定正確"
-        }
+        },
+        "chunksCount": "接收 {count} 个数据块 ({format})",
+        "chunksReceived": "接收到的数据块",
+        "copyFormat": {
+          "testResult": "测试结果",
+          "message": "消息",
+          "errorDetails": "错误详情"
+        },
+        "streamFormat": "流式格式",
+        "streamInfo": "流式响应信息",
+        "streamResponse": "流式响应",
+        "truncatedBrief": "显示前 {length} 字符，完整内容请点击「查看详情」",
+        "truncatedPreview": "显示前 {length} 字符，完整内容请复制查看"
       },
       "urlPreview": {
         "title": "URL 拼接預覽",
@@ -664,7 +683,7 @@
       "failureThreshold": "失败阈值（次）",
       "failureThresholdDesc": "连续失败多少次后触发熔断",
       "failureThresholdPlaceholder": "5",
-      "filterAllProviders": "全部供应商",
+      "filterAllProviders": "全部供應商",
       "filterByType": "篩選供應商類型",
       "filterProvider": "筛选供应商类型",
       "group": "分組",
@@ -707,7 +726,7 @@
       "modelWhitelistClear": "清空",
       "modelWhitelistDesc": "限制此供应商可以处理的模型。默认情况下，供应商可以处理该类型下的所有模型。",
       "modelWhitelistLabel": "允许的模型",
-      "modelWhitelistLoading": "加载中...",
+      "modelWhitelistLoading": "載入中...",
       "modelWhitelistManualAdd": "手动添加模型",
       "modelWhitelistManualDesc": "支持添加任意模型名称（不限于价格表中的模型）",
       "modelWhitelistManualPlaceholder": "输入模型名称（如 gpt-5-turbo）",
@@ -913,7 +932,8 @@
             "weekly": "週：${amount}",
             "monthly": "月：${amount}",
             "concurrent": "並發：{count}",
-            "none": "無限制"
+            "none": "無限制",
+            "daily": "日: {amount} (重置 {resetTime})"
           },
           "limit5h": {
             "label": "5 小時消費上限 (USD)",
@@ -930,6 +950,24 @@
           "limitConcurrent": {
             "label": "並發 Session 上限",
             "placeholder": "0 表示無限制"
+          },
+          "dailyResetMode": {
+            "label": "每日重置模式",
+            "options": {
+              "fixed": "固定时间重置",
+              "rolling": "滚动窗口（24小时）"
+            },
+            "desc": {
+              "fixed": "每天固定时间点重置配额",
+              "rolling": "从首次调用开始计算，24小时后重置"
+            }
+          },
+          "dailyResetTime": {
+            "label": "每日重置时间 (HH:mm)"
+          },
+          "limitDaily": {
+            "label": "每日消费上限 (USD)",
+            "placeholder": "留空表示无限制"
           }
         },
         "circuitBreaker": {
@@ -1030,6 +1068,41 @@
             }
           },
           "hint": "提示：部分嚴格的 Codex 中轉站（如 88code、foxcode）需要官方 instructions，請選擇「自動」或「強制官方」策略"
+        },
+        "mcpPassthrough": {
+          "title": "MCP 透传配置",
+          "summary": {
+            "none": "不启用",
+            "minimax": "Minimax",
+            "glm": "智谱 GLM",
+            "custom": "自定义 (预留)"
+          },
+          "desc": "启用后，将 MCP 工具调用透传到指定的 AI 服务商（如 minimax 的图片识别、联网搜索）",
+          "select": {
+            "label": "透传类型",
+            "none": {
+              "label": "不启用",
+              "desc": "不启用 MCP 透传功能（默认）"
+            },
+            "minimax": {
+              "label": "Minimax",
+              "desc": "透传到 minimax MCP 服务（支持图片识别、联网搜索等工具）"
+            },
+            "glm": {
+              "label": "智谱 GLM",
+              "desc": "透传到智谱 MCP 服务（支持图片分析、视频分析等工具）"
+            },
+            "custom": {
+              "label": "自定义",
+              "desc": "透传到自定义 MCP 服务（预留，暂未实现）"
+            },
+            "placeholder": "选择透传类型"
+          },
+          "hint": "提示: MCP 透传功能允许 Claude Code 客户端使用第三方 AI 服务商提供的工具能力（如图片识别、联网搜索）",
+          "urlLabel": "MCP 透传 URL",
+          "urlPlaceholder": "https://api.minimaxi.com",
+          "urlDesc": "MCP 服务的基础 URL。留空则自动从提供商 URL 提取基础域名",
+          "urlAuto": "自动提取: {url}"
         }
       },
       "providerTypes": {
@@ -1180,7 +1253,7 @@
       "weightCalc": "C 被選中概率 75%, A 被選中概率 25%",
       "weightExample": "C (權重 3), A (權重 1)"
     },
-    "keyLoading": "加载中...",
+    "keyLoading": "載入中...",
     "noProviders": "暂无服务商配置",
     "noProvidersDesc": "添加你的第一个 API 服务商",
     "notFound": "未找到相符的供應商",

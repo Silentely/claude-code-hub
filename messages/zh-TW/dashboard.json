@@ -57,7 +57,6 @@
       "provider": "供應商",
       "model": "模型",
       "endpoint": "端點",
-      "endpoint": "端點",
       "status": "狀態",
       "timeRange": "時間範圍",
       "startTime": "開始時間",
@@ -488,7 +487,8 @@
     "costWeekly": "週消費",
     "costMonthly": "月消費",
     "concurrentSessions": "並發 Session",
-    "noLimit": "無額度限制"
+    "noLimit": "無額度限制",
+    "costDaily": "每日消费"
   },
   "addKeyForm": {
     "title": "新增金鑰",
@@ -511,7 +511,8 @@
     "limit5hUsd": {
       "label": "5小時消費上限 (USD)",
       "placeholder": "留空表示無限制",
-      "description": "5小時內最大消費金額"
+      "description": "5小時內最大消費金額",
+      "descriptionWithUserLimit": "5小時內最大消費金額（用戶限額: ${limit}）"
     },
     "limitDailyUsd": {
       "label": "每日消費上限 (USD)",
@@ -537,17 +538,20 @@
     "limitWeeklyUsd": {
       "label": "週消費上限 (USD)",
       "placeholder": "留空表示無限制",
-      "description": "每週最大消費金額"
+      "description": "每週最大消費金額",
+      "descriptionWithUserLimit": "每週最大消費金額（用戶限額: ${limit}）"
     },
     "limitMonthlyUsd": {
       "label": "月消費上限 (USD)",
       "placeholder": "留空表示無限制",
-      "description": "每月最大消費金額"
+      "description": "每月最大消費金額",
+      "descriptionWithUserLimit": "每月最大消費金額（用戶限額: ${limit}）"
     },
     "limitConcurrentSessions": {
       "label": "並發 Session 上限",
       "placeholder": "0 表示無限制",
-      "description": "同時執行的對話數量"
+      "description": "同時執行的對話數量",
+      "descriptionWithUserLimit": "同時運行的對話數量（用戶限額: {limit}）"
     },
     "errors": {
       "userIdMissing": "使用者 ID 不存在",
@@ -639,5 +643,79 @@
     "delete": "刪除使用者",
     "editAriaLabel": "編輯使用者",
     "deleteAriaLabel": "刪除使用者"
+  },
+  "rateLimits": {
+    "title": "限流事件統計",
+    "description": "查看和分析限流事件的統計數據",
+    "loading": "載入中...",
+    "error": "載入失敗",
+    "totalEvents": "總事件數",
+    "avgUsage": "平均使用率",
+    "affectedUsers": "受影響用戶數",
+    "noData": "暫無數據",
+    "noDataHint": "在選定的時間範圍內沒有限流事件",
+    "filters": {
+      "startTime": "開始時間",
+      "endTime": "結束時間",
+      "user": "用戶",
+      "provider": "供應商",
+      "limitType": "限流類型",
+      "allUsers": "全部用戶",
+      "allProviders": "全部供應商",
+      "allLimitTypes": "全部類型",
+      "apply": "應用篩選",
+      "reset": "重置",
+      "loading": "載入中...",
+      "limitTypes": {
+        "rpm": "RPM限流",
+        "usd_5h": "5小時消費限流",
+        "usd_weekly": "週消費限流",
+        "usd_monthly": "月消費限流",
+        "concurrent_sessions": "並發Session限流",
+        "daily_quota": "每日額度限流"
+      }
+    },
+    "chart": {
+      "title": "限流事件時間線",
+      "description": "按小時統計的限流事件趨勢",
+      "total": "總計",
+      "events": "事件數"
+    },
+    "breakdown": {
+      "title": "限流類型分布",
+      "description": "不同限流類型的事件佔比",
+      "total": "總計",
+      "count": "事件數",
+      "percentage": "佔比",
+      "noData": "暫無數據",
+      "types": {
+        "rpm": "RPM限流",
+        "usd_5h": "5小時消費",
+        "usd_weekly": "週消費",
+        "usd_monthly": "月消費",
+        "concurrent_sessions": "並發Session",
+        "daily_quota": "每日額度"
+      }
+    },
+    "topUsers": {
+      "title": "受影響用戶排行",
+      "description": "觸發限流最多的用戶列表",
+      "total": "總計",
+      "rank": "排名",
+      "username": "用戶名",
+      "eventCount": "事件數",
+      "percentage": "佔比",
+      "loading": "載入中...",
+      "noData": "暫無數據"
+    }
+  },
+  "users": {
+    "title": "用户管理",
+    "description": "显示 {count} 个用户",
+    "toolbar": {
+      "searchPlaceholder": "按用户名搜索...",
+      "groupFilter": "按分组筛选",
+      "allGroups": "所有分组"
+    }
   }
 }

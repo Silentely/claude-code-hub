@@ -243,7 +243,14 @@
       "error": "データベースのインポートに失敗しました",
       "streamError": "レスポンスストリームを読み取れません",
       "errorUnknown": "不明なエラー",
-      "descriptionFull": "バックアップファイルからデータベースを復元します。PostgreSQL custom format（.dump）形式のバックアップファイルをサポートします。"
+      "descriptionFull": "バックアップファイルからデータベースを復元します。PostgreSQL custom format（.dump）形式のバックアップファイルをサポートします。",
+      "parseError": "解析响应数据失败",
+      "streamInterrupted": "数据流意外中断",
+      "streamInterruptedDesc": "导入进度未正常完成，请检查日志并验证数据完整性。如有问题，请重新导入。",
+      "successCleanModeDesc": "所有数据已成功恢复。如果页面显示异常，请刷新浏览器。",
+      "successMergeModeDesc": "数据已成功导入并合并。如果页面显示异常，请刷新浏览器。",
+      "successWithWarnings": "数据导入完成（有警告）",
+      "successWithWarningsDesc": "数据已成功导入，但跳过了一些已存在的对象。如果页面显示异常，请刷新浏览器或重启应用。"
     },
     "status": {
       "loading": "読み込み中...",
@@ -625,7 +632,7 @@
       "failureThreshold": "失败阈值（次）",
       "failureThresholdDesc": "连续失败多少次后触发熔断",
       "failureThresholdPlaceholder": "5",
-      "filterAllProviders": "全部供应商",
+      "filterAllProviders": "すべてのプロバイダー",
       "filterByType": "タイプでフィルタ",
       "filterProvider": "筛选供应商类型",
       "group": "グループ",
@@ -668,7 +675,7 @@
       "modelWhitelistClear": "清空",
       "modelWhitelistDesc": "限制此供应商可以处理的模型。默认情况下，供应商可以处理该类型下的所有模型。",
       "modelWhitelistLabel": "允许的模型",
-      "modelWhitelistLoading": "加载中...",
+      "modelWhitelistLoading": "読み込み中...",
       "modelWhitelistManualAdd": "手动添加模型",
       "modelWhitelistManualDesc": "支持添加任意模型名称（不限于价格表中的模型）",
       "modelWhitelistManualPlaceholder": "输入模型名称（如 gpt-5-turbo）",
@@ -874,7 +881,8 @@
             "weekly": "週: ${amount}",
             "monthly": "月: ${amount}",
             "concurrent": "同時: {count}",
-            "none": "無制限"
+            "none": "無制限",
+            "daily": "日: {amount} (重置 {resetTime})"
           },
           "limit5h": {
             "label": "5時間の上限 (USD)",
@@ -891,6 +899,24 @@
           "limitConcurrent": {
             "label": "同時セッション上限",
             "placeholder": "0 は無制限"
+          },
+          "dailyResetMode": {
+            "label": "每日重置模式",
+            "options": {
+              "fixed": "固定时间重置",
+              "rolling": "滚动窗口（24小时）"
+            },
+            "desc": {
+              "fixed": "每天固定时间点重置配额",
+              "rolling": "从首次调用开始计算，24小时后重置"
+            }
+          },
+          "dailyResetTime": {
+            "label": "每日重置时间 (HH:mm)"
+          },
+          "limitDaily": {
+            "label": "每日消费上限 (USD)",
+            "placeholder": "留空表示无限制"
           }
         },
         "circuitBreaker": {
@@ -985,6 +1011,47 @@
             }
           },
           "hint": "ヒント: 88code や foxcode など一部の厳格な Codex 中継では公式 instructions が必要です。「自動」または「公式を強制」を選択してください。"
+        },
+        "apiTest": {
+          "title": "供应商模型测试",
+          "summary": "验证供应商与模型连通性",
+          "desc": "测试供应商模型是否可用，默认与路由配置中选择的供应商类型保持一致。",
+          "testLabel": "供应商模型测试"
+        },
+        "mcpPassthrough": {
+          "title": "MCP 透传配置",
+          "summary": {
+            "none": "不启用",
+            "minimax": "Minimax",
+            "glm": "智谱 GLM",
+            "custom": "自定义 (预留)"
+          },
+          "desc": "启用后，将 MCP 工具调用透传到指定的 AI 服务商（如 minimax 的图片识别、联网搜索）",
+          "select": {
+            "label": "透传类型",
+            "none": {
+              "label": "不启用",
+              "desc": "不启用 MCP 透传功能（默认）"
+            },
+            "minimax": {
+              "label": "Minimax",
+              "desc": "透传到 minimax MCP 服务（支持图片识别、联网搜索等工具）"
+            },
+            "glm": {
+              "label": "智谱 GLM",
+              "desc": "透传到智谱 MCP 服务（支持图片分析、视频分析等工具）"
+            },
+            "custom": {
+              "label": "自定义",
+              "desc": "透传到自定义 MCP 服务（预留，暂未实现）"
+            },
+            "placeholder": "选择透传类型"
+          },
+          "hint": "提示: MCP 透传功能允许 Claude Code 客户端使用第三方 AI 服务商提供的工具能力（如图片识别、联网搜索）",
+          "urlLabel": "MCP 透传 URL",
+          "urlPlaceholder": "https://api.minimaxi.com",
+          "urlDesc": "MCP 服务的基础 URL。留空则自动从提供商 URL 提取基础域名",
+          "urlAuto": "自动提取: {url}"
         }
       },
       "providerTypes": {
@@ -1013,6 +1080,57 @@
       "success": {
         "created": "プロバイダーを追加しました",
         "createdDesc": "「{name}」を追加しました"
+      },
+      "apiTest": {
+        "fillUrlFirst": "请先填写供应商 URL",
+        "invalidUrl": "供应商 URL 无效，仅支持 http/https",
+        "fillKeyFirst": "请先填写 API 密钥",
+        "testFailed": "测试失败",
+        "testFailedRetry": "测试失败，请重试",
+        "noResult": "测试成功但未返回结果",
+        "testSuccess": "模型测试成功",
+        "testApi": "供应商模型测试",
+        "testing": "测试中...",
+        "apiFormat": "供应商类型",
+        "selectApiFormat": "选择要测试的供应商类型",
+        "apiFormatDesc": "默认同步路由配置中的供应商类型，除非手动修改",
+        "formatAnthropicMessages": "Claude (Anthropic Messages API)",
+        "formatOpenAIChat": "OpenAI Compatible",
+        "formatOpenAIResponses": "Codex (Response API)",
+        "testModel": "测试模型",
+        "testModelDesc": "可手动输入，不填写则使用默认模型",
+        "model": "模型",
+        "responseModel": "响应模型",
+        "responseTime": "响应时间",
+        "usage": "Token 用量",
+        "response": "响应内容",
+        "error": "错误信息",
+        "unknown": "未知",
+        "viewDetails": "查看详情",
+        "copySuccess": "已复制到剪贴板",
+        "copyFailed": "复制失败",
+        "copyResult": "复制结果",
+        "close": "关闭",
+        "success": "成功",
+        "failed": "失败",
+        "streamInfo": "流式响应信息",
+        "chunksReceived": "接收到的数据块",
+        "streamFormat": "流式格式",
+        "streamResponse": "流式响应",
+        "chunksCount": "接收 {count} 个数据块 ({format})",
+        "truncatedPreview": "显示前 {length} 字符，完整内容请复制查看",
+        "truncatedBrief": "显示前 {length} 字符，完整内容请点击「查看详情」",
+        "copyFormat": {
+          "testResult": "测试结果",
+          "message": "消息",
+          "errorDetails": "错误详情"
+        },
+        "disclaimer": {
+          "title": "注意",
+          "realRequest": "测试将向供应商发送真实请求，可能消耗少量额度",
+          "resultReference": "<strong>因各家供应商情况不同，测试结果仅供参考，不代表实际调用效果</strong>",
+          "confirmConfig": "请确认供应商 URL、API 密钥及模型配置正确"
+        }
       }
     },
     "guide": {
@@ -1135,7 +1253,7 @@
       "weightCalc": "Cは75％の選択確率、Aは25％",
       "weightExample": "C（重み3）、A（重み1）"
     },
-    "keyLoading": "加载中...",
+    "keyLoading": "読み込み中...",
     "noProviders": "暂无服务商配置",
     "noProvidersDesc": "添加你的第一个 API 服务商",
     "notFound": "プロバイダーが見つかりません",

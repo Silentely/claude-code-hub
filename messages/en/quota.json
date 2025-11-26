@@ -264,7 +264,8 @@
       "limit5hUsd": {
         "label": "5-Hour Cost Limit (USD)",
         "placeholder": "Leave blank for unlimited",
-        "description": "Maximum cost within 5 hours"
+        "description": "Maximum cost within 5 hours",
+        "descriptionWithUserLimit": "Maximum cost within 5 hours (User limit: ${limit})"
       },
       "limitDailyUsd": {
         "label": "Daily Cost Limit (USD)",
@@ -290,17 +291,20 @@
       "limitWeeklyUsd": {
         "label": "Weekly Cost Limit (USD)",
         "placeholder": "Leave blank for unlimited",
-        "description": "Maximum cost per week"
+        "description": "Maximum cost per week",
+        "descriptionWithUserLimit": "Maximum cost per week (User limit: ${limit})"
       },
       "limitMonthlyUsd": {
         "label": "Monthly Cost Limit (USD)",
         "placeholder": "Leave blank for unlimited",
-        "description": "Maximum cost per month"
+        "description": "Maximum cost per month",
+        "descriptionWithUserLimit": "Maximum cost per month (User limit: ${limit})"
       },
       "limitConcurrentSessions": {
         "label": "Concurrent Session Limit",
         "placeholder": "0 means unlimited",
-        "description": "Number of simultaneous conversations"
+        "description": "Number of simultaneous conversations",
+        "descriptionWithUserLimit": "Number of simultaneous conversations (User limit: {limit})"
       },
       "submitText": "Save Changes",
       "loadingText": "Saving...",
