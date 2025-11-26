@@ -398,8 +398,10 @@ export function ApiTestButton({
         <div className="space-y-1 text-amber-700 dark:text-amber-300">
           <div>• {t("disclaimer.realRequest")}</div>
           <div
-            dangerouslySetInnerHTML={{ __html: `• ${t("disclaimer.resultReference")}` }}
-          />
+            style={{ fontWeight: 'bold', color: 'inherit' }}
+          >
+            • {t("disclaimer.resultReference")}
+          </div>
           <div>• {t("disclaimer.confirmConfig")}</div>
         </div>
       </div>
